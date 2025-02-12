@@ -4,7 +4,9 @@ const path = require('path')
 const pinoHttp = require('pino-http')
 
 const logger = require('./utils/logger')('App')
+
 const creditPackageRouter = require('./routes/creditPackage')
+const coachesRouter = require('./routes/coaches')
 
 const app = express()
 app.use(cors())
@@ -25,7 +27,23 @@ app.get('/healthcheck', (req, res) => {
   res.status(200)
   res.send('OK')
 })
+
 app.use('/api/credit-package', creditPackageRouter)
+app.use('/api/coaches', coachesRouter)
+
+
+// 監聽 port
+const port = process.env.PORT || 3000;
+app.listen(port, async () => {
+  try {
+    await dataSource.initialize()
+    console.log('資料庫連線成功')
+    console.log(`伺服器運作中. port: ${port}`)
+  } catch (error) {
+    console.log(`資料庫連線失敗: ${error.message}`)
+    process.exit(1)
+  }
+})
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
