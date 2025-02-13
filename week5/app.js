@@ -9,6 +9,7 @@ const creditPackageRouter = require('./routes/creditPackage')
 const skillRouter = require('./routes/skill')
 const adminRouter = require('./routes/admin')
 const userRouter = require('./routes/user')
+const coachesRouter = require('./routes/coaches')
 
 const app = express()
 app.use(cors())
@@ -39,7 +40,7 @@ app.use('/api/user', userRouter)
 
 
 // 監聽 port
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 app.listen(port, async () => {
   try {
     await dataSource.initialize()
