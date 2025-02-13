@@ -1,25 +1,25 @@
 const { EntitySchema } = require('typeorm')
 
 module.exports = new EntitySchema({
-  name: "Skill",
-  tableName: "SKILL",
+  name: 'Skill',
+  tableName: 'SKILL',
   columns: {
     id: {
       primary: true,
-      type: "uuid",
-      generated: "uuid",
+      type: 'uuid',
+      generated: 'uuid',
       nullable: false
     },
     name: {
-      type: "varchar",
+      type: 'varchar',
       length: 50,
       nullable: false,
       unique: true
     },
     createdAt: {
-      type: "timestamp",
+      type: 'timestamp',
       createDate: true,
-      name: "created_at",
+      name: 'created_at',
       nullable: false
     }
   }

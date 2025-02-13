@@ -2,116 +2,90 @@ const express = require('express')
 
 const router = express.Router()
 const { dataSource } = require('../db/data-source')
+
 const logger = require('../utils/logger')('Skill')
 
-const AppDataSource = require("../db/data-source")
-
-
-
 function isUndefined (value) {
-    return value === undefined
+  return value === undefined
 }
 
 function isNotValidSting (value) {
-    return typeof value !== "string" || value.trim().length === 0 || value === ""
+  return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
-function isNotValidInteger (value) {
-    return typeof value !== "number" || value < 0 || value % 1 !== 0
+function isNumber (value) {
+  return typeof value == 'Number' && value > 0
 }
 
 
-router.get('/skill', async (req, res, next) => {
-    try {
-        const Skills = await AppDataSource.getRepository("Skill").find({
-            select: ["id", "name"]
-        })
-        res.status(200).json({
-            status: "success",
-            data: Skills
-        })
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "伺服器錯誤"
-        })
+
+router.get('/', async (req, res, next) => {
+  try {
+    const {per, page} =  req.query
+    if (isNumber(per) && isNumber(page)) {
+      const coaches = await dataSource.getRepository('Coach').find({
+        select: ['id', 'name']
+      })
+
+      let startIdx = (page-1)*per
+      let endIdx = page*per
+      let sendData = coaches.slice(startIdx,endIdx)
+      
+      res.status(200).json({
+        status: 'success',
+        data: sendData
+      })
     }
+    return
 
+  } catch (error) {
+    logger.error(error)
+    next(error)
+  }
 })
 
-router.post('/skill', async (req, res, next) => {
 
-    try {
-        const data = JSON.parse(req.body)
-        if (isUndefined(data.name) || isNotValidSting(data.name) ) {
-            res.status(400).json({
-                status: "failed",
-                message: "欄位未填寫正確"
-            })
-            return
-        }
-        const SkillRepo = await AppDataSource.getRepository("Skill")
-        const existSkill = await SkillRepo.find({
-            where: {
-                name: data.name
-            }
-        })
-        if (existSkill.length > 0) {
-            res.status(409).json({
-                status: "failed",
-                message: "資料重複"
-            })
-            return
-        }
-        const newSkill = await SkillRepo.create({
-          name: data.name,
-        })
-        const result = await SkillRepo.save(newSkill)
-        res.status(200).json({
-            status: "success",
-            data: result
-        })
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "伺服器錯誤"
-        })
+
+router.get('/:coachId', async (req, res, next) => {
+  try {
+    const { coachId } = req.params
+    if (isUndefined(coachId) || isNotValidSting(coachId)) {
+      res.status(400).json({
+        status: 'failed',
+        message: 'ID錯誤'
+      })
+      return
     }
     
-})
+    const result = await dataSource.getRepository('Coach').find({
+      select: ['id', 'user_id', 'experience_years', 'description', 'profile_image_url', 'created_at',  'updated_at'] ,
+      where: { id: coachId }
+    })
 
-router.delete('/skill/:skillId', async (req, res, next) => {
-    try {
-        
-        const skillId = req.params.skillId
-        if (isUndefined(skillId) || isNotValidSting(skillId)) {
-            res.status(400).json({
-                status: "failed",
-                message: "ID錯誤"
-            })
-            return
-        }
-        const result = await AppDataSource.getRepository("Skill").delete(skillId)
-        if (result.affected === 0) {
-            res.status(400).json({
-                status: "failed",
-                message: "ID錯誤"
-            })
-            return
-        }
-
-        res.status(200).json({
-            status: "success"
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "伺服器錯誤"
-        })
+    if (result.affected === 0) {
+      res.status(400).json({
+        status: 'failed',
+        message: '找不到該教練'
+      })
+      return
     }
+
+    const userInfo = await userRepository.findOne({
+      select: ['name', 'role'],
+      where: { id: result.user_id }
+    })
+    res.status(201).json({
+      status: 'success',
+      data: {
+        user: userInfo,
+        coach: result
+      }
+    })
+
+  } catch (error) {
+    logger.error(error)
+    next(error)
+  }
 })
-
-
 
 module.exports = router

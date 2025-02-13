@@ -14,7 +14,7 @@ const dataSource = new DataSource({
   synchronize: config.get('db.synchronize'),
   poolSize: 10,
   entities: [
-    CreditPackage, Skill
+    CreditPackage, Skill, User, Course, Coach
   ],
   ssl: config.get('db.ssl')
 })

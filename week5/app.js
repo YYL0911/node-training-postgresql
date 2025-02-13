@@ -6,7 +6,9 @@ const pinoHttp = require('pino-http')
 const logger = require('./utils/logger')('App')
 
 const creditPackageRouter = require('./routes/creditPackage')
-const coachesRouter = require('./routes/coaches')
+const skillRouter = require('./routes/skill')
+const adminRouter = require('./routes/admin')
+const userRouter = require('./routes/user')
 
 const app = express()
 app.use(cors())
@@ -23,13 +25,13 @@ app.use(pinoHttp({
 }))
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.get('/healthcheck', (req, res) => {
-  res.status(200)
-  res.send('OK')
-})
+
 
 app.use('/api/credit-package', creditPackageRouter)
+app.use('/api/coaches/skill', skillRouter)
 app.use('/api/coaches', coachesRouter)
+app.use('/api/admin', adminRouter)
+app.use('/api/user', userRouter)
 
 
 // 監聽 port
