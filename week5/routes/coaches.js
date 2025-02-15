@@ -14,7 +14,7 @@ function isNotValidSting (value) {
 }
 
 function isNotValidInteger (value) {
-  return typeof value !== 'number' || value < 0 || value % 1 !== 0
+  return typeof value !== 'number' || value <= 0 || value % 1 !== 0
 }
 
 
