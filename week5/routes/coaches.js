@@ -13,30 +13,63 @@ function isNotValidSting (value) {
   return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
-function isNumber (value) {
-  return typeof value == 'Number' && value > 0
+function isNotValidInteger (value) {
+  return typeof value !== 'number' || value < 0 || value % 1 !== 0
 }
-
 
 
 router.get('/', async (req, res, next) => {
   try {
     const {per, page} =  req.query
-    if (isNumber(per) && isNumber(page)) {
-      const coaches = await dataSource.getRepository('Coach').find({
-        select: ['id', 'name']
+    const perN = Number(per)
+    const pageN = Number(page)
+    
+    if (isNotValidInteger(perN) || isNotValidInteger(pageN)) {
+      logger.warn('欄位格式錯誤')
+      res.status(400).json({
+        status: 'failed',
+        message: '欄位格式錯誤'
       })
-
-      let startIdx = (page-1)*per
-      let endIdx = page*per
-      let sendData = coaches.slice(startIdx,endIdx)
-      
-      res.status(200).json({
-        status: 'success',
-        data: sendData
-      })
+      return
     }
-    return
+
+    // 抓取Coach ID 以及該教練user_id
+    const coaches = await dataSource.getRepository('Coach').find({
+      select: ['id', 'user_id']
+    })
+
+    // 抓取User 是教練的 ID 以及該User name
+    const userRepository = dataSource.getRepository('User')
+    const userInfo = await userRepository.find({
+      select: ['id', 'name'],
+      where: { role: 'COACH' }
+    });
+
+    // 將資料改成Coach ID，條件是User id == Coach user_id
+    for(let i = 0; i < userInfo.length; i++){
+      let targetId = userInfo[i].id; // User id
+      for(let j = 0; j < coaches.length; j++ ){
+        //條件是User id == Coach user_id
+        if(coaches[j].user_id == targetId){
+          userInfo[i].id = coaches[j].id;
+          break;
+        }
+      }
+    }
+
+
+    // 根據分頁，以及每頁幾筆去切割陣列範圍
+    const startIdx = (pageN-1)*perN;
+    const endIdx = pageN*perN;
+    const sendData = userInfo.slice(startIdx,endIdx);
+
+    
+    res.status(200).json({
+      status: 'success',
+      data: sendData
+    })
+    
+    
 
   } catch (error) {
     logger.error(error)
@@ -70,9 +103,11 @@ router.get('/:coachId', async (req, res, next) => {
       return
     }
 
+    
+    const userRepository = dataSource.getRepository('User')
     const userInfo = await userRepository.findOne({
       select: ['name', 'role'],
-      where: { id: result.user_id }
+      where: { id: result[0].user_id }
     })
     res.status(201).json({
       status: 'success',

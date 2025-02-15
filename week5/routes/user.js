@@ -15,10 +15,8 @@ function isNotValidSting (value) {
   return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
-console.log(123)
 // 新增使用者
 router.post('/signup', async (req, res, next) => {
-  console.log(456)
   try {
     const passwordPattern = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}/
     const { name, email, password } = req.body
