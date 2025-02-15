@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 const { dataSource } = require('../db/data-source')
 
-const logger = require('../utils/logger')('Skill')
+const logger = require('../utils/logger')('Coaches')
 
 function isUndefined (value) {
   return value === undefined

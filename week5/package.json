@@ -33,5 +33,12 @@
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.6.0",
     "nodemon": "^3.1.9"
-  }
+  },
+  "description": "1. 安裝相依套件",
+  "main": "app.js",
+  "bin": {
+    "bootcamp-fitness": "bin/www.js"
+  },
+  "author": "",
+  "license": "ISC"
 }

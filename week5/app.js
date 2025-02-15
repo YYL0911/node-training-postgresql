@@ -39,18 +39,20 @@ app.use('/api/admin', adminRouter)
 app.use('/api/user', userRouter)
 
 
-// 監聽 port
-const port = process.env.PORT || 8080;
-app.listen(port, async () => {
-  try {
-    await dataSource.initialize()
-    console.log('資料庫連線成功')
-    console.log(`伺服器運作中. port: ${port}`)
-  } catch (error) {
-    console.log(`資料庫連線失敗: ${error.message}`)
-    process.exit(1)
-  }
-})
+// // 監聽 port
+// const port = process.env.PORT || 8080;
+// app.listen(port, async () => {
+//   try {
+//     await dataSource.initialize()
+//     console.log('資料庫連線成功')
+//     console.log(`伺服器運作中. port: ${port}`)
+//   } catch (error) {
+//     console.log(`資料庫連線失敗: ${error.message}`)
+//     process.exit(1)
+//   }
+// })
+
+
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
