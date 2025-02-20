@@ -5,13 +5,8 @@ const { dataSource } = require('../db/data-source')
 
 const logger = require('../utils/logger')('Skill')
 
-function isUndefined (value) {
-  return value === undefined
-}
+const { isUndefined, isNotValidSting} = require('../utils/validation');
 
-function isNotValidSting (value) {
-  return typeof value !== 'string' || value.trim().length === 0 || value === ''
-}
 
 router.get('/', async (req, res, next) => {
   try {
