@@ -5,15 +5,11 @@ const router = express.Router()
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('Users')
 
+const { isUndefined, isNotValidSting} = require('../utils/validation');
+
 const saltRounds = 10
 
-function isUndefined (value) {
-  return value === undefined
-}
 
-function isNotValidSting (value) {
-  return typeof value !== 'string' || value.trim().length === 0 || value === ''
-}
 
 // 新增使用者
 router.post('/signup', async (req, res, next) => {
