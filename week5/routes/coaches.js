@@ -95,7 +95,7 @@ router.get('/:coachId', async (req, res, next) => {
       where: { id: coachId }
     })
 
-    if (result.affected === 0) {
+    if (result.length === 0) {
       res.status(400).json({
         status: 'failed',
         message: '找不到該教練'
@@ -109,11 +109,11 @@ router.get('/:coachId', async (req, res, next) => {
       select: ['name', 'role'],
       where: { id: result[0].user_id }
     })
-    res.status(201).json({
+    res.status(200).json({
       status: 'success',
       data: {
         user: userInfo,
-        coach: result
+        coach: result[0]
       }
     })
 
