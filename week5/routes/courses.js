@@ -11,6 +11,9 @@ const auth = require('../middlewares/auth')({
   logger
 })
 
+const { isUndefined, isNotValidSting, isNotValidInteger, isNotValidUuid } = require('../utils/validation');
+
+
 //取得課程列表
 router.get('/', async (req, res, next) => {
   try {
@@ -60,6 +63,15 @@ router.post('/:courseId', auth, async (req, res, next) => {
   try {
     const { id } = req.user
     const { courseId } = req.params
+    
+    if (isUndefined(coachId) || isNotValidSting(coachId) || isNotValidUuid(coachId)) {
+      res.status(400).json({
+        status: 'failed',
+        message: 'ID錯誤'
+      })
+      return
+    }
+
     const courseRepo = dataSource.getRepository('Course')
     //檢查課程是否存在
     const course = await courseRepo.findOne({
@@ -153,7 +165,7 @@ router.delete('/:courseId', auth, async (req, res, next) => {
         cancelledAt: IsNull()
       }
     })
-    if (!userCourseBooking) {
+    if (!userCourseBooking || isNotValidUuid(courseId)) {
       res.status(400).json({
         status: 'failed',
         message: 'ID錯誤'

@@ -4,7 +4,7 @@ const router = express.Router()
 const { dataSource } = require('../db/data-source')
 
 const logger = require('../utils/logger')('Coaches')
-const { isUndefined, isNotValidSting, isNotValidInteger } = require('../utils/validation');
+const { isUndefined, isNotValidSting, isNotValidInteger, isNotValidUuid } = require('../utils/validation');
 
 
 // 取得教練列表
@@ -85,7 +85,8 @@ router.get('/', async (req, res, next) => {
 router.get('/:coachId', async (req, res, next) => {
   try {
     const { coachId } = req.params
-    if (isUndefined(coachId) || isNotValidSting(coachId)) {
+  
+    if (isUndefined(coachId) || isNotValidSting(coachId) || isNotValidUuid(coachId)) {
       res.status(400).json({
         status: 'failed',
         message: 'ID錯誤'

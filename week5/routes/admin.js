@@ -11,89 +11,7 @@ const auth = require('../middlewares/auth')({
 })
 const isCoach = require('../middlewares/isCoach')
 
-const { isUndefined, isNotValidSting, isNotValidInteger } = require('../utils/validation');
-
-
-//將使用者新增為教練
-router.post('/coaches/:userId', async (req, res, next) => {
-  try {
-    const { userId } = req.params
-    const { experience_years: experienceYears, description, profile_image_url: profileImageUrl = null } = req.body
-    if (isUndefined(experienceYears) || isNotValidInteger(experienceYears) || isUndefined(description) || isNotValidSting(description)) {
-      logger.warn('欄位未填寫正確')
-      res.status(400).json({
-        status: 'failed',
-        message: '欄位未填寫正確'
-      })
-      return
-    }
-    if (profileImageUrl && !isNotValidSting(profileImageUrl) && !profileImageUrl.startsWith('https')) {
-      logger.warn('大頭貼網址錯誤')
-      res.status(400).json({
-        status: 'failed',
-        message: '欄位未填寫正確'
-      })
-      return
-    }
-    const userRepository = dataSource.getRepository('User')
-    const existingUser = await userRepository.findOne({
-      select: ['id', 'name', 'role'],
-      where: { id: userId }
-    })
-    if (!existingUser) {
-      logger.warn('使用者不存在')
-      res.status(400).json({
-        status: 'failed',
-        message: '使用者不存在'
-      })
-      return
-    } else if (existingUser.role === 'COACH') {
-      logger.warn('使用者已經是教練')
-      res.status(409).json({
-        status: 'failed',
-        message: '使用者已經是教練'
-      })
-      return
-    }
-    const coachRepo = dataSource.getRepository('Coach')
-    const newCoach = coachRepo.create({
-      user_id: userId,
-      experience_years: experienceYears,
-      description,
-      profile_image_url: profileImageUrl
-    })
-    const updatedUser = await userRepository.update({
-      id: userId,
-      role: 'USER'
-    }, {
-      role: 'COACH'
-    })
-    if (updatedUser.affected === 0) {
-      logger.warn('更新使用者失敗')
-      res.status(400).json({
-        status: 'failed',
-        message: '更新使用者失敗'
-      })
-      return
-    }
-    const savedCoach = await coachRepo.save(newCoach)
-    const savedUser = await userRepository.findOne({
-      select: ['name', 'role'],
-      where: { id: userId }
-    })
-    res.status(201).json({
-      status: 'success',
-      data: {
-        user: savedUser,
-        coach: savedCoach
-      }
-    })
-  } catch (error) {
-    logger.error(error)
-    next(error)
-  }
-})
-
+const { isUndefined, isNotValidSting, isNotValidInteger, isNotValidUuid} = require('../utils/validation');
 
 //編輯教練課程資料(未使用middlewares)
 // router.post('/coaches/courses', async (req, res, next) => {
@@ -165,7 +83,7 @@ router.post('/coaches/:userId', async (req, res, next) => {
 // })
 
 //新增教練課程資料
-router.post('/coaches/courses', auth, isCoach, async (req, res, next) => {
+router.post('/coaches/courses',  auth, isCoach, async (req, res, next) => {
   try {
     const { id } = req.user
     const {
@@ -181,7 +99,7 @@ router.post('/coaches/courses', auth, isCoach, async (req, res, next) => {
       isUndefined(meetingUrl) || isNotValidSting(meetingUrl) || !meetingUrl.startsWith('https')) {
       logger.warn('欄位未填寫正確')
       res.status(400).json({
-        status: 'failed',
+        status: 'failed123',
         message: '欄位未填寫正確'
       })
       return
@@ -222,6 +140,16 @@ router.put('/coaches/courses/:courseId', auth, isCoach, async (req, res, next) =
       skill_id: skillId, name, description, start_at: startAt, end_at: endAt,
       max_participants: maxParticipants, meeting_url: meetingUrl
     } = req.body
+
+    if (isNotValidUuid(courseId)) {
+      res.status(400).json({
+        status: 'failed',
+        message: 'ID錯誤'
+      })
+      return
+    }
+
+
     if (isNotValidSting(courseId) ||
       isUndefined(skillId) || isNotValidSting(skillId) ||
       isUndefined(name) || isNotValidSting(name) ||
@@ -275,6 +203,95 @@ router.put('/coaches/courses/:courseId', auth, isCoach, async (req, res, next) =
       status: 'success',
       data: {
         course: savedCourse
+      }
+    })
+  } catch (error) {
+    logger.error(error)
+    next(error)
+  }
+})
+
+//將使用者新增為教練
+router.post('/coaches/:userId', async (req, res, next) => {
+  try {
+    const { userId } = req.params
+    const { experience_years: experienceYears, description, profile_image_url: profileImageUrl = null } = req.body
+   
+    if (isNotValidUuid(userId)) {
+      res.status(400).json({
+        status: 'failed',
+        message: 'ID錯誤'
+      })
+      return
+    }
+
+    if (isUndefined(experienceYears) || isNotValidInteger(experienceYears) || isUndefined(description) || isNotValidSting(description)) {
+      logger.warn('欄位未填寫正確')
+      res.status(400).json({
+        status: 'failed',
+        message: '欄位未填寫正確'
+      })
+      return
+    }
+    if (profileImageUrl && !isNotValidSting(profileImageUrl) && !profileImageUrl.startsWith('https')) {
+      logger.warn('大頭貼網址錯誤')
+      res.status(400).json({
+        status: 'failed',
+        message: '欄位未填寫正確'
+      })
+      return
+    }
+    const userRepository = dataSource.getRepository('User')
+    const existingUser = await userRepository.findOne({
+      select: ['id', 'name', 'role'],
+      where: { id: userId }
+    })
+    if (!existingUser) {
+      logger.warn('使用者不存在')
+      res.status(400).json({
+        status: 'failed',
+        message: '使用者不存在'
+      })
+      return
+    } else if (existingUser.role === 'COACH') {
+      logger.warn('使用者已經是教練')
+      res.status(409).json({
+        status: 'failed',
+        message: '使用者已經是教練'
+      })
+      return
+    }
+    const coachRepo = dataSource.getRepository('Coach')
+    const newCoach = coachRepo.create({
+      user_id: userId,
+      experience_years: experienceYears,
+      description,
+      profile_image_url: profileImageUrl
+    })
+    const updatedUser = await userRepository.update({
+      id: userId,
+      role: 'USER'
+    }, {
+      role: 'COACH'
+    })
+    if (updatedUser.affected === 0) {
+      logger.warn('更新使用者失敗')
+      res.status(400).json({
+        status: 'failed',
+        message: '更新使用者失敗'
+      })
+      return
+    }
+    const savedCoach = await coachRepo.save(newCoach)
+    const savedUser = await userRepository.findOne({
+      select: ['name', 'role'],
+      where: { id: userId }
+    })
+    res.status(201).json({
+      status: 'success',
+      data: {
+        user: savedUser,
+        coach: savedCoach
       }
     })
   } catch (error) {

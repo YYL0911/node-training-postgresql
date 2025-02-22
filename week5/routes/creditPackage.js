@@ -10,7 +10,8 @@ const auth = require('../middlewares/auth')({
   logger
 })
 
-const { isUndefined, isNotValidSting, isNotValidInteger } = require('../utils/validation');
+const { isUndefined, isNotValidSting, isNotValidInteger, isNotValidUuid } = require('../utils/validation');
+
 
 //取得購買方案列表
 router.get('/', async (req, res, next) => {
@@ -74,6 +75,15 @@ router.post('/', async (req, res, next) => {
 router.delete('/:creditPackageId', async (req, res, next) => {
   try {
     const { creditPackageId } = req.params
+
+    if (isNotValidUuid(creditPackageId)) {
+      res.status(400).json({
+        status: 'failed',
+        message: 'ID錯誤'
+      })
+      return
+    }
+
     if (isUndefined(creditPackageId) || isNotValidSting(creditPackageId)) {
       res.status(400).json({
         status: 'failed',
@@ -110,7 +120,9 @@ router.post('/:creditPackageId', auth, async (req, res, next) => {
         id: creditPackageId
       }
     })
-    if (!creditPackage) {
+
+
+    if (!creditPackage || isNotValidUuid(creditPackageId)) {
       res.status(400).json({
         status: 'failed',
         message: 'ID錯誤'
