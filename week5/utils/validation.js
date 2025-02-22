@@ -18,7 +18,7 @@ function isNotValidUuid(value){
 // 將函式導出
 module.exports = {
   isUndefined,
-  isNotValidString,
+  isNotValidSting,
   isNotValidInteger,
   isNotValidUuid
 };

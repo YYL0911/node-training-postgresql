@@ -23,35 +23,50 @@ router.get('/', async (req, res, next) => {
       return
     }
 
-    // 抓取Coach ID 以及該教練user_id
-    const coaches = await dataSource.getRepository('Coach').find({
-      select: ['id', 'user_id']
-    })
+    // // 抓取Coach ID 以及該教練user_id
+    // const coaches = await dataSource.getRepository('Coach').find({
+    //   select: ['id', 'user_id']
+    // })
 
-    // 抓取User 是教練的 ID 以及該User name
-    const userRepository = dataSource.getRepository('User')
-    const userInfo = await userRepository.find({
-      select: ['id', 'name'],
-      where: { role: 'COACH' }
+    // // 抓取User 是教練的 ID 以及該User name
+    // const userRepository = dataSource.getRepository('User')
+    // const userInfo = await userRepository.find({
+    //   select: ['id', 'name'],
+    //   where: { role: 'COACH' }
+    // });
+
+    // // 將資料改成Coach ID，條件是User id == Coach user_id
+    // for(let i = 0; i < userInfo.length; i++){
+    //   let targetId = userInfo[i].id; // User id
+    //   for(let j = 0; j < coaches.length; j++ ){
+    //     //條件是User id == Coach user_id
+    //     if(coaches[j].user_id == targetId){
+    //       userInfo[i].id = coaches[j].id;
+    //       break;
+    //     }
+    //   }
+    // }
+
+
+    // // 根據分頁，以及每頁幾筆去切割陣列範圍
+    // const startIdx = (pageN-1)*perN;
+    // const endIdx = pageN*perN;
+    // const sendData = userInfo.slice(startIdx,endIdx);
+
+
+    const sendData = await dataSource.getRepository("Coach").find({
+      select: {
+        id: true,
+        User: {
+          name: true,
+        },
+      },
+      take: per,
+      skip: (pageN-1)*perN,
+      relations: {
+        User: true,
+      },
     });
-
-    // 將資料改成Coach ID，條件是User id == Coach user_id
-    for(let i = 0; i < userInfo.length; i++){
-      let targetId = userInfo[i].id; // User id
-      for(let j = 0; j < coaches.length; j++ ){
-        //條件是User id == Coach user_id
-        if(coaches[j].user_id == targetId){
-          userInfo[i].id = coaches[j].id;
-          break;
-        }
-      }
-    }
-
-
-    // 根據分頁，以及每頁幾筆去切割陣列範圍
-    const startIdx = (pageN-1)*perN;
-    const endIdx = pageN*perN;
-    const sendData = userInfo.slice(startIdx,endIdx);
 
     
     res.status(200).json({
