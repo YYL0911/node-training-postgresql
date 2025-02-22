@@ -61,6 +61,7 @@ router.post('/:courseId', auth, async (req, res, next) => {
     const { id } = req.user
     const { courseId } = req.params
     const courseRepo = dataSource.getRepository('Course')
+    //檢查課程是否存在
     const course = await courseRepo.findOne({
       where: {
         id: courseId
@@ -73,8 +74,25 @@ router.post('/:courseId', auth, async (req, res, next) => {
       })
       return
     }
-    const creditPurchaseRepo = dataSource.getRepository('CreditPurchase')
+
     const courseBookingRepo = dataSource.getRepository('CourseBooking')
+    //檢查此課程是否已達到最大人數
+    const courseBookingCount = await courseBookingRepo.count({
+      where: {
+        course_id: courseId,
+        cancelledAt: IsNull()
+      }
+    })
+    if (courseBookingCount >= course.max_participants) {
+      res.status(400).json({
+        status: 'failed',
+        message: '已達最大參加人數，無法參加'
+      })
+      return
+    }
+
+    
+    //檢查此使用者是否報名相同課程
     const userCourseBooking = await courseBookingRepo.findOne({
       where: {
         user_id: id,
@@ -88,6 +106,8 @@ router.post('/:courseId', auth, async (req, res, next) => {
       })
       return
     }
+
+    const creditPurchaseRepo = dataSource.getRepository('CreditPurchase')
     const userCredit = await creditPurchaseRepo.sum('purchased_credits', {
       user_id: id
     })
@@ -97,22 +117,11 @@ router.post('/:courseId', auth, async (req, res, next) => {
         cancelledAt: IsNull()
       }
     })
-    const courseBookingCount = await courseBookingRepo.count({
-      where: {
-        course_id: courseId,
-        cancelledAt: IsNull()
-      }
-    })
+    
     if (userUsedCredit >= userCredit) {
       res.status(400).json({
         status: 'failed',
         message: '已無可使用堂數'
-      })
-      return
-    } else if (courseBookingCount >= course.max_participants) {
-      res.status(400).json({
-        status: 'failed',
-        message: '已達最大參加人數，無法參加'
       })
       return
     }

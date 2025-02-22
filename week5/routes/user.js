@@ -113,6 +113,8 @@ router.post('/login', async (req, res, next) => {
       return
     }
     logger.info(`使用者資料: ${JSON.stringify(existingUser)}`)
+
+    //檢查密碼
     const isMatch = await bcrypt.compare(password, existingUser.password)
     if (!isMatch) {
       res.status(400).json({
@@ -121,6 +123,8 @@ router.post('/login', async (req, res, next) => {
       })
       return
     }
+
+    //更新token
     const token = await generateJWT({
       id: existingUser.id
     }, config.get('secret.jwtSecret'), {

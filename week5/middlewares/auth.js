@@ -1,3 +1,7 @@
+/*
+  驗證使用者
+*/
+
 const jwt = require('jsonwebtoken')
 
 const PERMISSION_DENIED_STATUS_CODE = 401
@@ -16,9 +20,11 @@ function generateError (status, message) {
 function formatVerifyError (jwtError) {
   let result
   switch (jwtError.name) {
+    // Token 已過期
     case 'TokenExpiredError':
       result = generateError(PERMISSION_DENIED_STATUS_CODE, FailedMessageMap.expired)
       break
+    // 無效的 token
     default:
       result = generateError(PERMISSION_DENIED_STATUS_CODE, FailedMessageMap.invalid)
       break
@@ -26,6 +32,7 @@ function formatVerifyError (jwtError) {
   return result
 }
 
+//使用JWT 驗證當下 Token 狀態
 function verifyJWT (token, secret) {
   return new Promise((resolve, reject) => {
     jwt.verify(token, secret, (error, decoded) => {
@@ -75,7 +82,7 @@ module.exports = ({
         return
       }
       req.user = user
-      next()
+      next() //驗證成功 => 繼續下一步
     } catch (error) {
       logger.error(`[AuthV2] ${error.message}`)
       next(error)

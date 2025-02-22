@@ -12,7 +12,7 @@ const auth = require('../middlewares/auth')({
 
 const { isUndefined, isNotValidSting, isNotValidInteger } = require('../utils/validation');
 
-
+//取得購買方案列表
 router.get('/', async (req, res, next) => {
   try {
     const creditPackage = await dataSource.getRepository('CreditPackage').find({
@@ -28,6 +28,7 @@ router.get('/', async (req, res, next) => {
   }
 })
 
+//新增購買方案
 router.post('/', async (req, res, next) => {
   try {
     const { name, credit_amount: creditAmount, price } = req.body
@@ -69,6 +70,35 @@ router.post('/', async (req, res, next) => {
   }
 })
 
+//刪除購買方案
+router.delete('/:creditPackageId', async (req, res, next) => {
+  try {
+    const { creditPackageId } = req.params
+    if (isUndefined(creditPackageId) || isNotValidSting(creditPackageId)) {
+      res.status(400).json({
+        status: 'failed',
+        message: '欄位未填寫正確'
+      })
+      return
+    }
+    const result = await dataSource.getRepository('CreditPackage').delete(creditPackageId)
+    if (result.affected === 0) {
+      res.status(400).json({
+        status: 'failed',
+        message: 'ID錯誤'
+      })
+      return
+    }
+    res.status(200).json({
+      status: 'success',
+      data: result
+    })
+  } catch (error) {
+    logger.error(error)
+    next(error)
+  }
+})
+
 //使用者購買方案
 router.post('/:creditPackageId', auth, async (req, res, next) => {
   try {
@@ -99,34 +129,6 @@ router.post('/:creditPackageId', auth, async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: null
-    })
-  } catch (error) {
-    logger.error(error)
-    next(error)
-  }
-})
-
-router.delete('/:creditPackageId', async (req, res, next) => {
-  try {
-    const { creditPackageId } = req.params
-    if (isUndefined(creditPackageId) || isNotValidSting(creditPackageId)) {
-      res.status(400).json({
-        status: 'failed',
-        message: '欄位未填寫正確'
-      })
-      return
-    }
-    const result = await dataSource.getRepository('CreditPackage').delete(creditPackageId)
-    if (result.affected === 0) {
-      res.status(400).json({
-        status: 'failed',
-        message: 'ID錯誤'
-      })
-      return
-    }
-    res.status(200).json({
-      status: 'success',
-      data: result
     })
   } catch (error) {
     logger.error(error)

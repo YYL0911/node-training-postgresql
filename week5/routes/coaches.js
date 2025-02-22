@@ -1,13 +1,13 @@
 const express = require('express')
 
 const router = express.Router()
-const config = require('../config/index')
 const { dataSource } = require('../db/data-source')
 
 const logger = require('../utils/logger')('Coaches')
 const { isUndefined, isNotValidSting, isNotValidInteger } = require('../utils/validation');
 
 
+// 取得教練列表
 router.get('/', async (req, res, next) => {
   try {
     const {per, page} =  req.query
@@ -23,6 +23,7 @@ router.get('/', async (req, res, next) => {
       return
     }
 
+    // 方法1 start----------------------------------
     // // 抓取Coach ID 以及該教練user_id
     // const coaches = await dataSource.getRepository('Coach').find({
     //   select: ['id', 'user_id']
@@ -47,12 +48,12 @@ router.get('/', async (req, res, next) => {
     //   }
     // }
 
-
     // // 根據分頁，以及每頁幾筆去切割陣列範圍
     // const startIdx = (pageN-1)*perN;
     // const endIdx = pageN*perN;
     // const sendData = userInfo.slice(startIdx,endIdx);
 
+    // 方法1 end----------------------------------
 
     const sendData = await dataSource.getRepository("Coach").find({
       select: {
@@ -68,13 +69,10 @@ router.get('/', async (req, res, next) => {
       },
     });
 
-    
     res.status(200).json({
       status: 'success',
       data: sendData
     })
-    
-    
 
   } catch (error) {
     logger.error(error)
@@ -83,7 +81,7 @@ router.get('/', async (req, res, next) => {
 })
 
 
-
+//取得教練資訊
 router.get('/:coachId', async (req, res, next) => {
   try {
     const { coachId } = req.params
@@ -108,7 +106,6 @@ router.get('/:coachId', async (req, res, next) => {
       return
     }
 
-    
     const userRepository = dataSource.getRepository('User')
     const userInfo = await userRepository.findOne({
       select: ['name', 'role'],
