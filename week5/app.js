@@ -10,6 +10,9 @@ const skillRouter = require('./routes/skill')
 const adminRouter = require('./routes/admin')
 const userRouter = require('./routes/user')
 const coachesRouter = require('./routes/coaches')
+const coursesRouter = require('./routes/courses')
+
+
 
 const app = express()
 app.use(cors())
@@ -37,6 +40,8 @@ app.use('/api/coaches/skill', skillRouter)
 app.use('/api/coaches', coachesRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/users', userRouter)
+app.use('/api/courses', coursesRouter)
+
 
 
 // eslint-disable-next-line no-unused-vars

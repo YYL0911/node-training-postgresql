@@ -1,8 +1,15 @@
 const express = require('express')
 
 const router = express.Router()
+const config = require('../config/index')
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('Admin')
+const auth = require('../middlewares/auth')({
+  secret: config.get('secret').jwtSecret,
+  userRepository: dataSource.getRepository('User'),
+  logger
+})
+const isCoach = require('../middlewares/isCoach')
 
 const { isUndefined, isNotValidSting, isNotValidInteger } = require('../utils/validation');
 
@@ -74,8 +81,59 @@ router.post('/coaches/courses', async (req, res, next) => {
   }
 })
 
-router.put('/coaches/courses/:courseId', async (req, res, next) => {
+//新增教練課程資料
+router.post('/coaches/courses', auth, isCoach, async (req, res, next) => {
   try {
+    const { id } = req.user
+    const {
+      skill_id: skillId, name, description, start_at: startAt, end_at: endAt,
+      max_participants: maxParticipants, meeting_url: meetingUrl
+    } = req.body
+    if (isUndefined(skillId) || isNotValidSting(skillId) ||
+      isUndefined(name) || isNotValidSting(name) ||
+      isUndefined(description) || isNotValidSting(description) ||
+      isUndefined(startAt) || isNotValidSting(startAt) ||
+      isUndefined(endAt) || isNotValidSting(endAt) ||
+      isUndefined(maxParticipants) || isNotValidInteger(maxParticipants) ||
+      isUndefined(meetingUrl) || isNotValidSting(meetingUrl) || !meetingUrl.startsWith('https')) {
+      logger.warn('欄位未填寫正確')
+      res.status(400).json({
+        status: 'failed',
+        message: '欄位未填寫正確'
+      })
+      return
+    }
+    const courseRepo = dataSource.getRepository('Course')
+    const newCourse = courseRepo.create({
+      user_id: id,
+      skill_id: skillId,
+      name,
+      description,
+      start_at: startAt,
+      end_at: endAt,
+      max_participants: maxParticipants,
+      meeting_url: meetingUrl
+    })
+    const savedCourse = await courseRepo.save(newCourse)
+    const course = await courseRepo.findOne({
+      where: { id: savedCourse.id }
+    })
+    res.status(201).json({
+      status: 'success',
+      data: {
+        course
+      }
+    })
+  } catch (error) {
+    logger.error(error)
+    next(error)
+  }
+})
+
+//編輯教練課程資料
+router.put('/coaches/courses/:courseId', auth, isCoach, async (req, res, next) => {
+  try {
+    const { id } = req.user
     const { courseId } = req.params
     const {
       skill_id: skillId, name, description, start_at: startAt, end_at: endAt,
@@ -98,7 +156,7 @@ router.put('/coaches/courses/:courseId', async (req, res, next) => {
     }
     const courseRepo = dataSource.getRepository('Course')
     const existingCourse = await courseRepo.findOne({
-      where: { id: courseId }
+      where: { id: courseId, user_id: id }
     })
     if (!existingCourse) {
       logger.warn('課程不存在')

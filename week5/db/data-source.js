@@ -6,6 +6,9 @@ const Skill = require('../entities/Skill')
 const User = require('../entities/User')
 const Course = require('../entities/Course')
 const Coach = require('../entities/Coach')
+const CreditPurchase = require('../entities/CreditPurchase')
+const CourseBooking = require('../entities/CourseBooking')
+
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -17,7 +20,8 @@ const dataSource = new DataSource({
   synchronize: config.get('db.synchronize'),
   poolSize: 10,
   entities: [
-    CreditPackage, Skill, User, Course, Coach
+    CreditPackage, Skill, User, Course, Coach,
+    CreditPurchase, CourseBooking
   ],
   ssl: config.get('db.ssl')
 })
