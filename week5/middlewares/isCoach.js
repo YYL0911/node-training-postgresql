@@ -8,6 +8,7 @@ const PERMISSION_DENIED_STATUS_CODE = 401
 function generateError (status = PERMISSION_DENIED_STATUS_CODE, message = FORBIDDEN_MESSAGE) {
   const error = new Error(message)
   error.status = status
+  error.message = message
   return error
 }
 

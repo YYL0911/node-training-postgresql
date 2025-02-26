@@ -64,7 +64,7 @@ router.post('/:courseId', auth, async (req, res, next) => {
     const { id } = req.user
     const { courseId } = req.params
     
-    if (isUndefined(coachId) || isNotValidSting(coachId) || isNotValidUuid(coachId)) {
+    if (isUndefined(courseId) || isNotValidSting(courseId) || isNotValidUuid(courseId)) {
       res.status(400).json({
         status: 'failed',
         message: 'ID錯誤'
@@ -108,7 +108,8 @@ router.post('/:courseId', auth, async (req, res, next) => {
     const userCourseBooking = await courseBookingRepo.findOne({
       where: {
         user_id: id,
-        course_id: courseId
+        course_id: courseId,
+        cancelledAt: IsNull() //防止取消同一課程後無法再次報名
       }
     })
     if (userCourseBooking) {

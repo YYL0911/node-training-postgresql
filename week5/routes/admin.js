@@ -99,7 +99,7 @@ router.post('/coaches/courses',  auth, isCoach, async (req, res, next) => {
       isUndefined(meetingUrl) || isNotValidSting(meetingUrl) || !meetingUrl.startsWith('https')) {
       logger.warn('欄位未填寫正確')
       res.status(400).json({
-        status: 'failed123',
+        status: 'failed',
         message: '欄位未填寫正確'
       })
       return

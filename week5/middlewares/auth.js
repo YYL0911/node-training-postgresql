@@ -14,7 +14,7 @@ const FailedMessageMap = {
 function generateError (status, message) {
   const error = new Error(message)
   error.status = status
-  console.log(123)
+  error.message = message
   return error
 }
 
