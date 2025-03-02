@@ -15,6 +15,13 @@ const auth = require('../middlewares/auth')({
 
 const user = require('../controllers/user')
 
+// (使用handleErrorAsync)
+/*
+const handleErrorAsync = require('../utils/handleErrorAsync')
+//註冊
+router.post('/signup', handleErrorAsync(user.postSignup))
+*/
+
 
 //註冊
 router.post('/signup', user.postSignup)
