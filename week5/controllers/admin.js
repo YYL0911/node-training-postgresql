@@ -472,6 +472,7 @@ async function getCoachProfile (req, res, next) {
         experience_years: true,
         description: true,
         profile_image_url: true,
+        //[ {id1}, {id2}, ...]
         CoachLinkSkill: {
           skill_id: true
         }
@@ -605,14 +606,23 @@ async function putCoachProfile (req, res, next) {
       where: { user_id: id }
     })
 
+
     //變更基本資訊
-    await coachRepo.update({
+    const updateCoachInfo = await coachRepo.update({
       id: coach.id
     }, {
       experience_years: experienceYears,
       description,
       profile_image_url: profileImageUrl
     })
+    if (updateCoachInfo.affected == 0) {
+      logger.warn('更新資訊失敗')
+      res.status(400).json({
+        status: 'failed',
+        message: '更新教練資訊失敗'
+      })
+      return
+    }
 
     // 把全部擅長技能重新加入
     const coachLinkSkillRepo = dataSource.getRepository('CoachLinkSkill')
@@ -622,11 +632,30 @@ async function putCoachProfile (req, res, next) {
     }))
 
     //刪除全部舊有擅長技能
-    await coachLinkSkillRepo.delete({ coach_id: coach.id })
+    const deleteSkill = await coachLinkSkillRepo.delete({ coach_id: coach.id })
+    if (deleteSkill.affected == 0) {
+      logger.warn('更新資訊失敗')
+      res.status(400).json({
+        status: 'failed',
+        message: '更新教練資訊失敗'
+      })
+      return
+    }
+
+
     //加入新的擅長技能
-    const insert = await coachLinkSkillRepo.insert(newCoachLinkSkill)
+    const insertSkill = await coachLinkSkillRepo.insert(newCoachLinkSkill)
+    if (insertSkill.affected == 0) {
+      logger.warn('更新資訊失敗')
+      res.status(400).json({
+        status: 'failed',
+        message: '更新教練資訊失敗'
+      })
+      return
+    }
+
     logger.info(`newCoachLinkSkill: ${JSON.stringify(newCoachLinkSkill, null, 1)}`)
-    logger.info(`insert: ${JSON.stringify(insert, null, 1)}`)
+    logger.info(`insert: ${JSON.stringify(insertSkill, null, 1)}`)
     
     //取得更新後的資訊
     const result = await coachRepo.find({
@@ -649,11 +678,11 @@ async function putCoachProfile (req, res, next) {
     res.status(200).json({
       status: 'success',
       data: {
-        id: result[0].id,
-        experience_years: result[0].experience_years,
-        description: result[0].description,
+        // id: result[0].id,
+        // experience_years: result[0].experience_years,
+        // description: result[0].description,
         profile_image_url: result[0].profile_image_url,
-        skill_ids: result[0].CoachLinkSkill.map(skill => skill.skill_id)
+        // skill_ids: result[0].CoachLinkSkill.map(skill => skill.skill_id)
       }
     })
   } catch (error) {
