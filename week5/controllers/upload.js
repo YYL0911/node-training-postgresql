@@ -55,6 +55,7 @@ async function postUploadImage (req, res, next) {
   }
 }
 
+
 module.exports = {
   postUploadImage
 }

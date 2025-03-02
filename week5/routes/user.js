@@ -23,27 +23,26 @@ router.post('/signup', handleErrorAsync(user.postSignup))
 */
 
 
-//註冊
-router.post('/signup', user.postSignup)
-
-//使用者登入
-router.post('/login', user.postLogin)
-
 //取得個人資料
 router.get('/profile', auth, user.getProfile)
-
-//變更個人資料
-router.put('/profile', auth, user.putProfile)
-
-
-//使用者更新密碼
-router.put('/password', auth, user.putPassword)
 
 //取得已預約的課程列表
 router.get('/courses', auth, user.getCourseBooking)
 
 //取得使用者已購買的方案列表
 router.get('/credit-package', auth, user.getCreditPackage)
+
+//註冊
+router.post('/signup', user.postSignup)
+
+//使用者登入
+router.post('/login', user.postLogin)
+
+//變更個人資料
+router.put('/profile', auth, user.putProfile)
+
+//使用者更新密碼
+router.put('/password', auth, user.putPassword)
 
 
 module.exports = router

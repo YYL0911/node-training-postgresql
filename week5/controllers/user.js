@@ -277,7 +277,6 @@ async function putProfile (req, res, next) {
   }
 }
 
-
 //使用者更新密碼
 async function putPassword (req, res, next) {
   try {
@@ -472,7 +471,6 @@ async function getCourseBooking (req, res, next) {
     next(error)
   }
 }
-
 
 //取得使用者已購買的方案列表
 async function getCreditPackage (req, res, next) {

@@ -16,4 +16,5 @@ router.get('/:coachId', coach.getCoachInfo)
 //取得指定教練課程列表
 router.get('/:coachId/courses', coach.getCoachCourses)
 
+
 module.exports = router

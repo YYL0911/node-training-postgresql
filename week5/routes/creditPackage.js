@@ -19,10 +19,11 @@ router.get('/', creditPackage.getCreditPackage)
 //新增購買方案
 router.post('/', creditPackage.postCreditPackage)
 
+//使用者購買方案
+router.post('/:creditPackageId', auth, creditPackage.postUserCreditPackage)
+
 //刪除購買方案
 router.delete('/:creditPackageId', creditPackage.deleteCreditPackage)
 
-//使用者購買方案
-router.post('/:creditPackageId', auth, creditPackage.postUserCreditPackage)
 
 module.exports = router

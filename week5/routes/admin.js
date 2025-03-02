@@ -40,9 +40,4 @@ router.put('/coaches', auth, isCoach, admin.putCoachProfile)
 router.put('/coaches/courses/:courseId', auth, isCoach, admin.putCourses)
 
 
-
-
-
-
-
 module.exports = router

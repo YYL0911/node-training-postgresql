@@ -663,8 +663,6 @@ async function putCoachProfile (req, res, next) {
 }
 
 
-
-
 module.exports = {
     postCourses,
     putCourses,
