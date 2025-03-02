@@ -7,3 +7,6 @@
 - JWT
 - 身份驗證
 - Token 金鑰設計
+- AJAX 檔案上傳
+- multer、firebase 套件
+- API 設計
